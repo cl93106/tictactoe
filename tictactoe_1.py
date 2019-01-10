@@ -14,6 +14,10 @@ class TicTacToeGame:
                         (1, 4, 7), (2, 5, 8), (3, 6, 9), \
                         (1, 5, 9), (3, 5, 7)]
 
+        self.pieces = ['X', 'O']
+        self.players = ['player', 'comp']
+        self.validMoves = set(range(1,10))
+
     def printBoard(self):
         # print each row, with margins and borders
         for row in self.numpadOrder:
@@ -23,7 +27,7 @@ class TicTacToeGame:
                 print('   |   |   ')
             else:
                 print('___|___|___')
-        print('\n')
+        # print('\n')
 
     def placePiece(self, piece, loc):
         # place piece at loc
@@ -40,15 +44,32 @@ class TicTacToeGame:
     def playerInput(self):
         # player inputs move location
         loc = -1
-        nums = set(range(1,10))
-        while loc not in nums or not self.board[loc] == ' ':
-            print('Input next move location (1-9)')
+        while True:
+            print('Input next move location (1-9):')
             loc = int(input())
-        return loc
+            if loc not in self.validMoves or not self.board[loc] == ' ':
+                print(loc, 'is not a valid move.')
+            else:
+                return loc
+
+    def compInputRandom(self):
+        # pick random empty spot
+        while True:
+            loc = random.randint(1,9)
+            if self.board[loc] == ' ':
+                return loc
 
     def compInput(self):
-        # not implemented yet
-        pass
+        # first move
+        if set(self.board) == {' '}:
+            return 1
+
+        # second move
+        if len(set(self.board)) == 1:
+            return 5
+
+        # TODO: not complete
+
 
     def checkIfWin(self, piece):
         b = self.board
@@ -59,34 +80,50 @@ class TicTacToeGame:
         else:
             return False
 
-    def playGame(self):
-        pieces = ['X', 'O']
-        players = ['player', 'comp']
+    def switchTurnAndPiece(self, playerInd, pieceInd):
+        return not(playerInd), not(pieceInd)
 
-        currentPlayerInd = random.randint(0,1)
-        currentPieceInd = 0
+    def getFirstPlayerAndPiece(self):
+        # Pick randomly who goes first, and randomly which piece
+        playerInd = random.randint(0, 1)  # 0 is player, 1 is comp
+        pieceInd = random.randint(0, 1)   # 0 is X, 1 is O
+        if playerInd:
+            print('Computer is going first, using piece', self.pieces[pieceInd])
+        else:
+            print('Player is going first, using piece', self.pieces[pieceInd])
+
+        return playerInd, pieceInd
+
+    def playGame(self):
+
+        print('Begin Tic-Tac-Toe')
+        # who goes first, and with which piece is picked randomly
+        curPlayerInd, curPieceInd = self.getFirstPlayerAndPiece()
 
         while not self.isFull():
+            print('Current board:')
             self.printBoard()
-            curPlayer = players[currentPlayerInd]
-            curPiece = pieces[currentPieceInd]
+            curPlayer = self.players[curPlayerInd]
+            curPiece = self.pieces[curPieceInd]
 
             if curPlayer == 'player':
+                print('Player\'s turn')
                 loc = self.playerInput()
-                print(loc)
                 self.placePiece(curPiece, loc)
             else:
-                print('hello')
+                print('Computer\'s turn')
+                loc = self.compInputRandom()
+                print('Computer places ' + curPiece + ' at ' + str(loc))
+                self.placePiece(curPiece, loc)
 
-            self.printBoard()
             # check if someone has won
             if self.checkIfWin(curPiece):
+                self.printBoard()
                 print(curPiece, " is the winner")
                 break
 
-            # switch piece
-            currentPieceInd = not(currentPieceInd)
-            currentPlayerInd = not(currentPlayerInd)
+            # switch piece/turn
+            curPlayerInd, curPieceInd = self.switchTurnAndPiece(curPlayerInd, curPieceInd)
 
         print('Game is over')
         print('Play again? (y/n)')
@@ -95,12 +132,5 @@ class TicTacToeGame:
             self.resetBoard()
             self.playGame()
 
-
 b1 = TicTacToeGame()
-# b1.printBoard()
-# b1.placePiece('X',1)
-# b1.placePiece('O',5)
-# b1.placePiece('X',6)
-# b1.placePiece('O',9)
-# b1.printBoard()
 b1.playGame()
