@@ -35,7 +35,7 @@ class TicTacToeGame:
 
     def isFull(self):
         # no blank spaces means full
-        return not ' ' in self.board
+        return not ' ' in self.board[1:]
 
     def resetBoard(self):
         # initialize all spaces to blank
@@ -60,16 +60,45 @@ class TicTacToeGame:
                 return loc
 
     def compInput(self):
-        # first move
+        # first move on empty board, go corner
         if set(self.board) == {' '}:
             return 1
 
-        # second move
-        if len(set(self.board)) == 1:
+        # second move, go center
+        if len(set(self.board)) == 1 and self.board[5] == ' ':
             return 5
 
-        # TODO: not complete
+        # find vacant spots
+        vacant = [i for i in range(1,10) if self.board[i] == ' ']
+        curPiece = self.pieces[self.pieceInd]
 
+        # pick winning move
+        for loc in vacant:
+            self.board[loc] = curPiece
+            if self.checkIfWin(curPiece):
+                self.board[loc] = ' '
+                return loc
+            self.board[loc] = ' '
+
+        # block opponent winning move
+        oppPiece = self.pieces[self.pieceInd ^ 1]
+        for loc in vacant:
+            self.board[loc] = oppPiece
+            if self.checkIfWin(oppPiece):
+                self.board[loc] = ' '
+                return loc
+            self.board[loc] = ' '
+
+        # pick prenultimate winning move
+
+        # pick center
+
+        # pick corner
+
+        # pick edge
+
+        # TODO: not complete
+        return vacant[0]
 
     def checkIfWin(self, piece):
         b = self.board
@@ -80,31 +109,32 @@ class TicTacToeGame:
         else:
             return False
 
-    def switchTurnAndPiece(self, playerInd, pieceInd):
-        return not(playerInd), not(pieceInd)
+    def switchTurnAndPiece(self):
+        self.playerInd ^= 1
+        self.pieceInd ^= 1
 
     def getFirstPlayerAndPiece(self):
         # Pick randomly who goes first, and randomly which piece
-        playerInd = random.randint(0, 1)  # 0 is player, 1 is comp
-        pieceInd = random.randint(0, 1)   # 0 is X, 1 is O
-        if playerInd:
-            print('Computer is going first, using piece', self.pieces[pieceInd])
+        self.playerInd = random.randint(0, 1)  # 0 is player, 1 is comp
+        self.pieceInd = random.randint(0, 1)   # 0 is X, 1 is O
+        if self.playerInd:
+            print('Computer is going first, using piece', self.pieces[self.pieceInd])
         else:
-            print('Player is going first, using piece', self.pieces[pieceInd])
+            print('Player is going first, using piece', self.pieces[self.pieceInd])
 
-        return playerInd, pieceInd
+    def getPlayerAndPiece(self):
+        return self.players[self.playerInd], self.pieces[self.pieceInd]
 
     def playGame(self):
 
         print('Begin Tic-Tac-Toe')
         # who goes first, and with which piece is picked randomly
-        curPlayerInd, curPieceInd = self.getFirstPlayerAndPiece()
+        self.getFirstPlayerAndPiece()
 
         while not self.isFull():
             print('Current board:')
             self.printBoard()
-            curPlayer = self.players[curPlayerInd]
-            curPiece = self.pieces[curPieceInd]
+            curPlayer, curPiece = self.getPlayerAndPiece()
 
             if curPlayer == 'player':
                 print('Player\'s turn')
@@ -112,7 +142,8 @@ class TicTacToeGame:
                 self.placePiece(curPiece, loc)
             else:
                 print('Computer\'s turn')
-                loc = self.compInputRandom()
+                # loc = self.compInputRandom()
+                loc = self.compInput()
                 print('Computer places ' + curPiece + ' at ' + str(loc))
                 self.placePiece(curPiece, loc)
 
@@ -123,9 +154,10 @@ class TicTacToeGame:
                 break
 
             # switch piece/turn
-            curPlayerInd, curPieceInd = self.switchTurnAndPiece(curPlayerInd, curPieceInd)
+            self.switchTurnAndPiece()
 
-        print('Game is over')
+        self.printBoard()
+        print('Game is over, nobody wins')
         print('Play again? (y/n)')
 
         if input().lower().startswith('y'):
