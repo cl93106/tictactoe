@@ -46,7 +46,13 @@ class TicTacToeGame:
         loc = -1
         while True:
             print('Input next move location (1-9):')
-            loc = int(input())
+
+            try:
+                loc = int(input())
+            except ValueError:
+                print('Invalid input.')
+                continue
+
             if loc not in self.validMoves or not self.board[loc] == ' ':
                 print(loc, 'is not a valid move.')
             else:
@@ -59,18 +65,17 @@ class TicTacToeGame:
             if self.board[loc] == ' ':
                 return loc
 
+    @property
     def compInput(self):
-        # first move on empty board, go corner
+        curPiece = self.pieces[self.pieceInd]
+
+
+        # first to move on empty board, go corner
         if set(self.board) == {' '}:
             return 1
 
-        # second move, go center
-        if len(set(self.board)) == 1 and self.board[5] == ' ':
-            return 5
-
         # find vacant spots
-        vacant = [i for i in range(1,10) if self.board[i] == ' ']
-        curPiece = self.pieces[self.pieceInd]
+        vacant = set([i for i in range(1,10) if self.board[i] == ' '])
 
         # pick winning move
         for loc in vacant:
@@ -89,16 +94,26 @@ class TicTacToeGame:
                 return loc
             self.board[loc] = ' '
 
-        # pick prenultimate winning move
-
         # pick center
+        if 5 in vacant:
+            return 5
+
+        # play defensive move if opponent captures 2 opposite corners
+        if (self.board[1] == self.board[9] == oppPiece) or \
+           (self.board[1] == self.board[9] == oppPiece):
+            if self.board[4] == self.board[6] == ' ':
+                return 4
+            elif self.board[2] == self.board[8] == ' ':
+                return 2
 
         # pick corner
+        for i in (1,3,7,9):
+            if i in vacant:
+                return i
 
         # pick edge
+        return vacant.pop()
 
-        # TODO: not complete
-        return vacant[0]
 
     def checkIfWin(self, piece):
         b = self.board
@@ -143,21 +158,23 @@ class TicTacToeGame:
             else:
                 print('Computer\'s turn')
                 # loc = self.compInputRandom()
-                loc = self.compInput()
+                loc = self.compInput
                 print('Computer places ' + curPiece + ' at ' + str(loc))
                 self.placePiece(curPiece, loc)
 
             # check if someone has won
             if self.checkIfWin(curPiece):
                 self.printBoard()
-                print(curPiece, " is the winner")
+                print(curPlayer, ' using ', curPiece, ' is the winner')
                 break
 
             # switch piece/turn
             self.switchTurnAndPiece()
+        else:
+            print('Draw')
 
         self.printBoard()
-        print('Game is over, nobody wins')
+        print('Game is over')
         print('Play again? (y/n)')
 
         if input().lower().startswith('y'):
