@@ -140,6 +140,12 @@ class TicTacToeGame:
     def getPlayerAndPiece(self):
         return self.players[self.playerInd], self.pieces[self.pieceInd]
 
+    def talkTrash(self):
+        lines = ['How you like them apples?',
+                 'Computer is wicked smaht!']
+
+        return random.choice(lines)
+
     def playGame(self):
 
         print('Begin Tic-Tac-Toe')
@@ -174,6 +180,8 @@ class TicTacToeGame:
             print('Draw')
 
         self.printBoard()
+        if curPlayer == 'comp':
+            print(self.talkTrash())
         print('Game is over')
         print('Play again? (y/n)')
 
